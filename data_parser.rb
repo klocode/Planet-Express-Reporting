@@ -24,42 +24,47 @@ class Delivery
     pilot.include? name
   end
 
+end
 
+class Parse
+  attr_accessor :file
+
+  def initialize(file=nil)
+    parse_data(file) if file
+  end
+
+  def parse_data(file_name)
+    self.file = CSV.foreach(file_name, headers: true, header_converters:
+    :symbol).collect { |row| Delivery.new(row) }
+  end
+
+  def trips(pilot_name)
+    file.count {|trip| trip.pilot.include? pilot_name}
+  end
+
+  def bonus(pilot_name)
+    file.select{|cash| cash.pilot.include? pilot_name}.inject(0){|sum, delivery| sum + delivery.profit} * 0.10
+  end
+
+  def planet_profit(planet)
+    file.select{|money| money.destination.include? planet}.inject(0){|sum, delivery| sum + delivery.profit}
+  end
 
 end
 
+log = Parse.new
+log.parse_data("planet_express_logs.csv")
+# puts log.inspect
 
-deliveries = []
 
-data = CSV.foreach("planet_express_logs.csv", headers: true, header_converters:
-:symbol)
-
-data.each do |item|
-  deliveries << Delivery.new(item)
+pilots = log.file.collect(&:pilot).uniq
+puts pilots.inspect
+log.file.each do |trip|
+  puts "#{pilots} made #{log.trips(trip.pilot)}"
 end
 
-# puts deliveries.inspect
+# puts Parse.trips(log).each {|trip| puts "#{trip.pilot}'s trips are #{log.trips(trip.pilot)}"}
 
-total_profit = deliveries.inject(0){|sum, delivery| sum + delivery.profit }
-puts total_profit.inspect
-
-# puts deliveries.inspect
-
-puts "Fry's total trips are: #{deliveries.count{|delivery| delivery.pilot == "Fry"}}"
-puts "Amy's total trips are: #{deliveries.count{|delivery| delivery.pilot == "Amy"}}"
-puts "Bender's total trips are: #{deliveries.count{|delivery| delivery.pilot == "Bender"}}"
-puts "Leela's total trips are: #{deliveries.count{|delivery| delivery.pilot == "Leela"}}"
-
-fry_bonus = deliveries.select{|bonus| bonus.cash? "Fry"}.collect(&:profit)
-fry_bonus = fry_bonus.inject(0, :+) * 0.1
-
-amy_bonus = deliveries.select{|bonus| bonus.cash? "Amy"}.collect(&:profit)
-amy_bonus = amy_bonus.inject(0, :+) * 0.1
-
-bender_bonus = deliveries.select{|bonus| bonus.cash? "Bender"}.collect(&:profit)
-bender_bonus = bender_bonus.inject(0, :+) * 0.1
-
-leela_bonus = deliveries.select{|bonus| bonus.cash? "Leela"}.collect(&:profit)
-leela_bonus = leela_bonus.inject(0, :+) * 0.1
-
-puts "Fry's bonus is $#{fry_bonus}, Amy's bonus is $#{amy_bonus}, Bender's bonus is $#{bender_bonus}, and Leela's bonus is $#{leela_bonus}!"
+# puts "Fry made #{log.trips("Fry")} trips, Amy made #{log.trips("Amy")} trips, Bender made #{log.trips("Bender")} trips, and Leela made #{log.trips("Leela")} trips."
+# puts "Fry's bonus is: $#{log.bonus("Fry")}, Amy's bonus is: $#{log.bonus("Amy")}, Bender's bonus is: $#{log.bonus("Bender")}, and Leela's bonus is: $#{log.bonus("Leela")}"
+# puts "Earth's total profit was $#{log.planet_profit("Earth")}, Mars' total profit was: $#{log.planet_profit("Mars")}"
