@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'csv'
 
 class Delivery
@@ -58,9 +60,18 @@ log.parse_data("planet_express_logs.csv")
 
 
 pilots = log.file.collect(&:pilot).uniq
-puts pilots.inspect
-log.file.each do |trip|
-  puts "#{pilots} made #{log.trips(trip.pilot)}"
+planets = log.file.collect(&:destination).uniq
+# puts pilots.inspect
+pilots.each do |pilot|
+  puts "#{pilot} made #{log.trips(pilot)} trips."
+end
+
+pilots.each do |pilot|
+  puts "#{pilot} made $#{log.bonus(pilot)} bonus."
+end
+
+planets.each do |planet|
+  puts "#{planet} made $#{log.planet_profit(planet)} profit."
 end
 
 # puts Parse.trips(log).each {|trip| puts "#{trip.pilot}'s trips are #{log.trips(trip.pilot)}"}
