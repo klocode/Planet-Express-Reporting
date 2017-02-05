@@ -1,6 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'csv'
+file_name = ARGV[0]
+report = ARGV[1]
+
+#checking to see if 'report' is typed in the command line or not
+if report&.downcase == "report"
+  report_check = true
+else
+  report_check = false
+end
 
 class Delivery
   attr_accessor :destination, :shipment, :number, :profit, :pilot
@@ -34,11 +43,13 @@ class Parse
   def initialize(file=nil)
     parse_data(file) if file
   end
+#initializing file variable with the Delivery objects
 
   def parse_data(file_name)
     self.file = CSV.foreach(file_name, headers: true, header_converters:
     :symbol).collect { |row| Delivery.new(row) }
   end
+  #
 
   def trips(pilot_name)
     file.count {|trip| trip.pilot.include? pilot_name}
@@ -54,14 +65,13 @@ class Parse
 
 end
 
-log = Parse.new
-log.parse_data("planet_express_logs.csv")
-# puts log.inspect
 
+log = Parse.new
+log.parse_data(file_name)
 
 pilots = log.file.collect(&:pilot).uniq
 planets = log.file.collect(&:destination).uniq
-# puts pilots.inspect
+
 pilots.each do |pilot|
   puts "#{pilot} made #{log.trips(pilot)} trips."
 end
@@ -74,8 +84,12 @@ planets.each do |planet|
   puts "#{planet} made $#{log.planet_profit(planet)} profit."
 end
 
-# puts Parse.trips(log).each {|trip| puts "#{trip.pilot}'s trips are #{log.trips(trip.pilot)}"}
-
-# puts "Fry made #{log.trips("Fry")} trips, Amy made #{log.trips("Amy")} trips, Bender made #{log.trips("Bender")} trips, and Leela made #{log.trips("Leela")} trips."
-# puts "Fry's bonus is: $#{log.bonus("Fry")}, Amy's bonus is: $#{log.bonus("Amy")}, Bender's bonus is: $#{log.bonus("Bender")}, and Leela's bonus is: $#{log.bonus("Leela")}"
-# puts "Earth's total profit was $#{log.planet_profit("Earth")}, Mars' total profit was: $#{log.planet_profit("Mars")}"
+#if report is typed into the command line, create a new CSV file with data
+if report_check == true
+  CSV.open("new_report.csv", "w", col_sep: '') do |csv|
+    csv << ["Pilot, Shipment, Total Revenue, Payment"]
+    pilots.each do |pilot|
+      csv << ["#{pilot}, #{log.trips(pilot)}, #{log.bonus(pilot) / 0.10}, #{log.bonus(pilot)}"]
+    end
+  end
+end
