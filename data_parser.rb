@@ -83,7 +83,7 @@ end
 planets.each do |planet|
   puts "#{planet} made $#{log.planet_profit(planet)} profit."
 end
-#total profit
+
 total_revenue = log.file.map{|money| money.profit}.inject(:+)
 puts "The Total Revenue for this week is: $#{total_revenue}"
 
