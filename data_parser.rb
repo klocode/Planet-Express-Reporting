@@ -49,7 +49,7 @@ class Parse
     self.file = CSV.foreach(file_name, headers: true, header_converters:
     :symbol).collect { |row| Delivery.new(row) }
   end
-  #
+
 
   def trips(pilot_name)
     file.count {|trip| trip.pilot.include? pilot_name}
@@ -83,6 +83,9 @@ end
 planets.each do |planet|
   puts "#{planet} made $#{log.planet_profit(planet)} profit."
 end
+
+total_revenue = log.file.map{|money| money.profit}.inject(:+)
+puts "The Total Revenue for this week is: $#{total_revenue}"
 
 #if report is typed into the command line, create a new CSV file with data
 if report_check == true
