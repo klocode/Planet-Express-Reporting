@@ -24,15 +24,11 @@ class Delivery
 
   def pilot_finder
     case destination
-    when "Earth" then @pilot = "Fry"
-    when "Mars" then @pilot = "Amy"
-    when "Uranus" then @pilot = "Bender"
-    else @pilot = "Leela"
+    when "Earth" then "Fry"
+    when "Mars" then "Amy"
+    when "Uranus" then "Bender"
+    else "Leela"
     end
-  end
-
-  def cash?(name)
-    pilot.include? name
   end
 
 end
@@ -46,13 +42,12 @@ class Parse
 #initializing file variable with the Delivery objects
 
   def parse_data(file_name)
-    self.file = CSV.foreach(file_name, headers: true, header_converters:
-    :symbol).collect { |row| Delivery.new(row) }
+    @file = CSV.foreach(file_name, headers: true, header_converters: :symbol).collect { |row| Delivery.new(row) }
   end
 
 
   def trips(pilot_name)
-    file.count {|trip| trip.pilot.include? pilot_name}
+    file.count {|trip| trip.pilot == pilot_name}
   end
 
   def bonus(pilot_name)
@@ -87,7 +82,7 @@ end
 total_revenue = log.file.map{|money| money.profit}.inject(:+)
 puts "The Total Revenue for this week is: $#{total_revenue}"
 
-#if report is typed into the command line, create a new CSV file with data
+# #if report is typed into the command line, create a new CSV file with data
 if report_check == true
   CSV.open("new_report.csv", "w", col_sep: '') do |csv|
     csv << ["Pilot, Shipment, Total Revenue, Payment"]
